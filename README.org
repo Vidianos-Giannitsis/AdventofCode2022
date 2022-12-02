@@ -1,0 +1,3 @@
+#+TITLE: Advent of Code 2022
+
+This repository is about my solutions for the problems in Advent of Code 2022. I am playing around with this mainly to sharpen my common-lisp knowledge with some practical examples and get more familiar with features of the language. My solutions are most likely far from the best possible, as I am not even a programmer, but more of a hobbyist, but I will try to solve all of the problems uploaded here.

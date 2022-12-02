@@ -1,0 +1,47 @@
+#+TITLE: Day 1
+
+[[https://adventofcode.com/2022/day/1][Link]]
+
+The input is a list of numbers, with spaces. I need to separate the numbers based on where spaces are, sum all numbers in one list (no spaces in between) and find the max of those.
+
+Using this code I generated 0s in the empty lines
+#+BEGIN_SRC elisp
+
+  (defun current-line-empty-p ()
+    (save-excursion
+      (beginning-of-line)
+      (looking-at-p "[[:blank:]]*$")))
+
+  (defun insert-zero-at-empty-line ()
+    (dotimes (i 500)
+      (while (not (current-line-empty-p)) (evil-next-visual-line))
+      (insert "0")))
+
+#+END_SRC
+
+I can sum until 0 with
+#+BEGIN_SRC lisp
+
+(loop for calory in data
+      until (= calory 0)
+      sum calory into total
+      finally (return total))
+
+#+END_SRC
+
+I need to see how I can run a loop that does this for everything. This seems to work
+
+#+BEGIN_SRC lisp
+
+  (defun calory-counter ()
+    (setf total 0)
+    (setf totals-list '())
+    (dolist (calory data)
+      (if (= calory 0)
+	  (progn (setf totals-list (push total totals-list))
+		 (setf total 0))
+	  (setf total (+ total calory))))
+    totals-list)
+
+#+END_SRC
+

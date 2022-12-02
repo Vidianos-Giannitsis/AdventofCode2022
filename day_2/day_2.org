@@ -1,0 +1,87 @@
+#+TITLE: Day 2
+
+[[https://adventofcode.com/2022/day/2][Link]]
+
+* Part one
+Day 2 is about a rock paper scissors game. A and X are Rock, B and Y Paper and C and Z Scissors. You get 1 point for rock, 2 for paper and 3 for scissors. Furthermore, 6 if you win and 3 for a tie.
+
+First, lets count the points for rock, paper and scissors. This is done with
+#+BEGIN_SRC lisp
+
+  (loop for i in data-2
+	count (eq 'X (cdr i)) into xs
+	count (eq 'Y (cdr i)) into ys
+	count (eq 'Z (cdr i)) into zs
+	finally (return (list xs ys zs)))
+#+END_SRC
+
+and returns (585 1327 588) meaning 5003 points in total not accounting wins, losses and ties.
+
+Then, we need to write a function that takes a list and checks if you win, tie or lose.
+
+You win in (A Y), (B Z), (C X)
+You tie in (A X), (B Y), (C Z)
+You lose in (A Z), (B X), (C Y)
+
+This is done with the function rps-game seen below. Then, collect its results with gen-results
+#+BEGIN_SRC lisp
+
+  (defun rps-game (list)
+    (setf results '())
+    (cond ((and (eq 'A (car list)) (eq 'Y (cdr list))) (push "win" results))
+	  ((and (eq 'B (car list)) (eq 'Z (cdr list))) (push "win" results))
+	  ((and (eq 'C (car list)) (eq 'X (cdr list))) (push "win" results))
+	  ((and (eq 'A (car list)) (eq 'X (cdr list))) (push "tie" results))
+	  ((and (eq 'B (car list)) (eq 'Y (cdr list))) (push "tie" results))
+	  ((and (eq 'C (car list)) (eq 'Z (cdr list))) (push "tie" results))
+	  ((and (eq 'A (car list)) (eq 'Z (cdr list))) (push "loss" results))
+	  ((and (eq 'B (car list)) (eq 'X (cdr list))) (push "loss" results))
+	  ((and (eq 'C (car list)) (eq 'Y (cdr list))) (push "loss" results))
+	  ))
+
+  (defun gen-results () (loop for i in data-2
+			      collect (rps-game i) into res
+			      finally (return res)))
+#+END_SRC
+
+I am definite you can do rps-game much less repetitively with a macro (which might be an interesting experiment but not something I am going to do right now). Then, find the number of wins, ties and losses with
+
+#+BEGIN_SRC lisp
+
+  (loop for j in (gen-results)
+	count (equal '("win") j) into wins
+	count (equal '("tie") j) into ties
+	count (equal '("loss") j) into losses
+	finally (return (list wins ties losses)))
+
+#+END_SRC
+
+Wins, Ties and Losses are respectively: 492 1237 771. This means another 6663 points. Therefore, the total points are 11666.
+
+* Part two
+For part two, we change the meaning of X, Y and Z to say if you need to win, tie or lose. Points are calculated in the same manner, but you need to find out what you have to win, tie or lose. X means lose, Y means tie and Z means win. From before, the list of (X, Y, Z) is (585 1327 588). So, wins and losses generate 7509 points. Then, we need to figure out how many points we get per round.
+
+By modifying the previous code as
+#+BEGIN_SRC lisp
+
+  (defvar points 0)
+
+  (defun rps-game* (list)
+    (setf points 0)
+    (cond ((and (eq 'A (car list)) (eq 'Y (cdr list))) (+ points 1))
+	  ((and (eq 'B (car list)) (eq 'Z (cdr list))) (+ points 3))
+	  ((and (eq 'C (car list)) (eq 'X (cdr list))) (+ points 2))
+	  ((and (eq 'A (car list)) (eq 'X (cdr list))) (+ points 3))
+	  ((and (eq 'B (car list)) (eq 'Y (cdr list))) (+ points 2))
+	  ((and (eq 'C (car list)) (eq 'Z (cdr list))) (+ points 1))
+	  ((and (eq 'A (car list)) (eq 'Z (cdr list))) (+ points 2))
+	  ((and (eq 'B (car list)) (eq 'X (cdr list))) (+ points 1))
+	  ((and (eq 'C (car list)) (eq 'Y (cdr list))) (+ points 3))
+	  ))
+
+  (loop for i in data-2
+	sum (rps-game* i) into points
+	finally (return points))
+
+#+END_SRC
+we get 5258 as the result of the loop meaning that is the amount of points from rock, paper or scissors. Our total points are therefore 12767.
