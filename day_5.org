@@ -1,0 +1,45 @@
+#+TITLE: Day 5
+
+[[https://adventofcode.com/2022/day/5][Link]]
+
+The input is nine rows of letter. Then, there is a procedure of 500 steps of moving these and we need to find out which letter ends up where. Moving is from top to bottom one at a time. Since the first element of every list is the ~car~ of the list, it is very easy to manipulate them. For moving, you can ~push~ the element to the list which also prepends the element. Therefore, this should be fairly easy to do.
+
+Each action will be a 3 element list and each operation will be a dotimes expression. The amount of executions will be the first element of the list. Then, each run will ~push~ the ~car~ of the second element of the list to the third.
+
+For this, we create a var init-list storing the initial state and then create a function moving-ops that does the operations specified above. With that done, if we loop for every action in the list and run this destructive operation, the initial variable will take the required form. The code is in the code block below
+#+BEGIN_SRC lisp
+
+  (setf init-list '((V Q W M B N Z C)
+		    (B C W R Z H)
+		    (J R Q F)
+		    (T M N F H W S Z)
+		    (P Q N L W F G)
+		    (W P L)
+		    (J Q C G R D B V)
+		    (W B N Q Z)
+		    (J T G C F L H)))
+
+  (defun moving-ops (amount start end)
+    (dotimes (i amount)
+      (push (car (nth (- start 1) init-list)) (nth (- end 1) init-list))
+      (setf (nth (- start 1) init-list)
+	    (cdr (nth (- start 1) init-list)))))
+
+  (loop for (amount start end) in data
+	do (moving-ops amount start end))
+
+#+END_SRC
+
+For the second operation, the crates are not moved one by one but all at once. Therefore, we do not move the car a specified amount of times. We move n elements of the list to the other list. This is a bit harder to do in cl logic. However, modifying the moving-ops-9001 function like below does the job.
+#+BEGIN_SRC lisp
+  (defun moving-ops-9001 (amount start end)
+    (setf list1 (subseq (nth (- start 1) init-list) 0 (+ 0 amount)))
+    (dotimes (i amount)
+      (push (nth (- amount 1 i) list1)
+	    (nth (- end 1) init-list))
+      (setf (nth (- start 1) init-list)
+	    (cdr (nth (- start 1) init-list)))))
+  
+#+END_SRC
+
+First, it collects the list of elements the operation needs to move. Then, in the dotimes, it moves elements of that list going backwards one by one. The rest of the function is the same.

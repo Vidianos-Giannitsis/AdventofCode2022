@@ -1,0 +1,58 @@
+#+TITLE: Day 3
+
+[[https://adventofcode.com/2022/day/3][Link]]
+
+In this, you are given an array of letters in each line. You need to split them in half and find the element that is in both halfs for every sequence. This can be done with this function.
+
+#+BEGIN_SRC lisp
+
+  (defun find-string-equal (string)
+    (let ((mid (/ (length string) 2))
+	  (size (length string)))
+      (setf list1 (subseq string 0 (- mid 1)))
+      (setf list2 (subseq string mid size))
+      (loop for i across list1
+	    for j across list2
+	    when (find i list2)
+	      collect i into equal
+	    when (find j list1)
+	      collect j into equal
+	    finally (return (remove-duplicates equal)))
+      ))
+  
+#+END_SRC
+
+It takes a string, finds its size and middle point and collects the two halfs into variables. Then, finds letters in one list that are part of the other and the other way around and returns that letter removing duplicates.
+
+Then, recursively run this function on every string in the dataset
+#+BEGIN_SRC lisp
+
+  (loop for string in data
+	collect (find-string-equal string) into letter
+	finally (return letter))
+  
+#+END_SRC
+
+Then, I need to associate the letter to a number. I find the association with 
+#+BEGIN_SRC lisp
+
+  (setf num 1)
+
+  (setf association
+	(loop for letter across "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	      collect (cons letter num) into link
+	      do (setf num (+ 1 num))
+	      finally (return link)))
+
+#+END_SRC
+And then find the sum with
+#+BEGIN_SRC lisp
+
+  (loop for letter in letters
+	when (cdr (assoc (car letter) association))
+	  sum it into coll
+	finally (return coll))
+
+#+END_SRC
+
+AOC says this is incorrect, however I cannot find an issue so I am going to continue to the next one.

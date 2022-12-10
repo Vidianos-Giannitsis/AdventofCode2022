@@ -1,0 +1,49 @@
+#+TITLE: Day 4
+
+[[https://adventofcode.com/2022/day/4][Link]]
+
+I am given two ranges of numbers. I need to find the number of times the one range is fully contained in the other. First, I need to find a way to get the list out of the range.
+#+BEGIN_SRC lisp
+
+  (defun create-num-list (num1 num2)
+    (dotimes (i (- (+ num2 1) num1))
+      (push (+ num1 i) numlist))
+    numlist)
+
+#+END_SRC
+
+Then, we need a function to check if a list is a subset of another list. Luckily, CL has a function ~subsetp~ for that. However, for it to work, the first list needs to be the smaller of the two. Therefore, we need to check both lists.
+
+So, we create the lists from the 1st-2nd and 3rd-4th numbers and 3rd-4th and 1st-2nd. Then, we need to check if either one of the two can return t for subsetp. This is very easy and can be done with these.
+#+BEGIN_SRC lisp
+
+  (defun gen-num-lists-subsets (list)
+    (setf list1 (create-num-list (first list) (second list)))
+    (setf list2 (create-num-list (third list) (fourth list)))
+    (or (subsetp list1 list2) (subsetp list2 list1)))
+
+  (loop for list in data
+	counting (gen-num-lists-subsets list) into trues
+	finally (return trues))
+  
+#+END_SRC
+
+For the second part, we need to count the times there is any overlap. For this, instead of using subset, we need to see if any element in list1 is a member of list2. Then, count the instances where the overlap is larger than 0. This is done with these.
+
+#+BEGIN_SRC lisp
+
+  (defun gen-num-lists-member (list)
+    (setf list1 (create-num-list (first list) (second list)))
+    (setf list2 (create-num-list (third list) (fourth list)))
+    (loop for i in list1
+	for j in list2
+	counting (member i list2) into overlaps1
+	counting (member j list1) into overlaps2
+	finally (return (+ overlaps1 overlaps2)))
+    )
+
+  (loop for list in data
+	counting (not (= 0 (gen-num-lists-member list))) into trues
+	finally (return trues))
+  
+#+END_SRC
