@@ -1,0 +1,36 @@
+#+TITLE: Day 6
+
+[[https://adventofcode.com/2022/day/6][Link]]
+
+For this problem you are given a long stream of characters. You need to find a stream of 4 characters which are all unique and report the location in which this happens. Since given a string, you can ~loop~ across the string and test for string equality.
+
+First thing I did was write a function that finds if a letter is in a string more than once. This is by checking if I can find the letter in the string from after the position it was found the first time. This is done with this
+#+BEGIN_SRC lisp
+
+  (defun find-letter-in-string (letter string)
+    (find letter (subseq string (+ (position letter string) 1))))
+
+#+END_SRC
+
+Then, make a function that runs this function recursively on every letter of a string. That function should remove duplicates in the list so that it only contains one instance of nil and then every duplicate letter. This is done with
+#+BEGIN_SRC lisp
+
+  (defun find-multiple-in-string (test-string)
+    (loop for letter across test-string
+	  collect (find-letter-in-string letter test-string) into equal
+	  finally (return (remove-duplicates equal))))
+
+#+END_SRC
+
+If this returns a list of length 1 then that is either nil or the same letter for times in a row (which we hope does not happen and indeed it does not). If it is nil we have found the position we care about. For iteration, we use a dotimes from i until the size of the list -4 and in each loop collect a subseq of i and i+4. Then, checks if this string has any duplicates with the above function. When it finds a string of 4 that has no duplicates, it should save i+4 in a variable and break the loop with ~return~. That variable will store the needed variable.
+#+BEGIN_SRC lisp
+
+  (dotimes (i (- (length data) 4))
+    (let ((string1 (subseq data i (+ i 4))))
+      (when (= 1 (length (find-multiple-in-string string1)))
+	(progn (setf test-var (+ i 4))
+	       (return)))))
+
+#+END_SRC
+
+For the second part, we need to do the same but find 14 distinct characters. For this, just change every instance of 4 to 14.
